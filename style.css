@@ -1,0 +1,29 @@
+ .finished {
+      color: #6c757d;
+      text-decoration: line-through;
+    }
+    .list-group-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .task-text {
+      flex-grow: 1;
+      margin-left: 10px;
+      margin-right: 10px;
+      word-wrap: break-word;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+    .status-ok {
+      color: #28a745;
+      font-weight: bold;
+      white-space: nowrap;
+      width: 70px;
+      text-align: left;
+    }
+    .task-actions button {
+      margin-left: 5px;
+    }
