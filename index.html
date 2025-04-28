@@ -26,6 +26,7 @@
     <h1>Minha Lista de Tarefas</h1>
     <div class="input-group mb-3">
       <input type="text" id="new-task" class="form-control" placeholder="Adicionar nova tarefa...">
+      <input type="date" id="due-date" class="form-control" style="max-width: 200px;">
       <button class="btn btn-outline-success" type="button" onclick="addTask()">Adicionar</button>
     </div>
     <ul id="task-list" class="list-group"></ul>
@@ -37,6 +38,7 @@
     const PASSWORD = 'admin';
 
     const taskInput = document.getElementById('new-task');
+    const dueDateInput = document.getElementById('due-date');
     const taskList = document.getElementById('task-list');
     const localStorageKey = 'taskList';
 
@@ -78,7 +80,7 @@
       if (storedTasks) {
         const tasks = JSON.parse(storedTasks);
         tasks.forEach(task => {
-          addTaskToDOM(task.text, task.finished);
+          addTaskToDOM(task.text, task.finished, task.dueDate);
         });
       }
     }
@@ -87,9 +89,11 @@
       const tasks = [];
       taskList.querySelectorAll('.list-group-item').forEach(item => {
         const span = item.querySelector('.task-text');
+        const dueDate = item.getAttribute('data-due-date');
         tasks.push({
-          text: span.textContent,
-          finished: span.classList.contains('finished')
+          text: span.textContent.split(' (Entrega:')[0],  // Salva só o texto puro
+          finished: span.classList.contains('finished'),
+          dueDate: dueDate
         });
       });
       localStorage.setItem(localStorageKey, JSON.stringify(tasks));
@@ -97,24 +101,32 @@
 
     function addTask() {
       const taskText = taskInput.value.trim();
-      if (taskText !== "") {
-        addTaskToDOM(taskText, false);
+      const dueDate = dueDateInput.value;
+
+      if (taskText !== "" && dueDate !== "") {
+        addTaskToDOM(taskText, false, dueDate);
         taskInput.value = "";
+        dueDateInput.value = "";
         saveTasks();
+      } else {
+        alert('Por favor, preencha a tarefa e a data de entrega!');
       }
     }
 
-    function addTaskToDOM(text, finished) {
+    function addTaskToDOM(text, finished, dueDate) {
       const listItem = document.createElement('li');
       listItem.classList.add('list-group-item');
+      listItem.setAttribute('data-due-date', dueDate);
 
       const statusHTML = finished
         ? '<span class="status-ok">✅ OK</span>'
         : '<span class="status-ok" style="visibility: hidden;">✅ OK</span>';
 
+      const formattedText = `${text} (Entrega: ${formatDate(dueDate)})`;
+
       listItem.innerHTML = `
         ${statusHTML}
-        <span class="task-text ${finished ? 'finished' : ''}">${text}</span>
+        <span class="task-text ${finished ? 'finished' : ''}">${formattedText}</span>
         <div class="task-actions">
           <button class="btn btn-sm btn-warning" onclick="finishTask(this)">Finalizar</button>
           <button class="btn btn-sm btn-danger" onclick="removeTask(this)">Excluir</button>
@@ -125,9 +137,11 @@
     }
 
     function removeTask(button) {
-      const listItem = button.closest('.list-group-item');
-      listItem.remove();
-      saveTasks();
+      if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+        const listItem = button.closest('.list-group-item');
+        listItem.remove();
+        saveTasks();
+      }
     }
 
     function finishTask(button) {
@@ -140,6 +154,11 @@
       statusSpan.style.visibility = textSpan.classList.contains('finished') ? 'visible' : 'hidden';
 
       saveTasks();
+    }
+
+    function formatDate(dateStr) {
+      const parts = dateStr.split('-');
+      return `${parts[2]}/${parts[1]}/${parts[0]}`; // dd/mm/yyyy
     }
   </script>
 </body>
