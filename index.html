@@ -33,7 +33,6 @@
     <button class="btn btn-secondary mt-3" onclick="logout()">Sair</button>
   </div>
 
-  <!-- Modal de Confirmação -->
   <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -62,7 +61,7 @@
     const taskList = document.getElementById('task-list');
     const localStorageKey = 'taskList';
 
-    let taskToDelete = null; // variável global para guardar a tarefa a ser excluída
+    let taskToDelete = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('loggedIn') === 'true') {
@@ -188,7 +187,7 @@
 
     function formatDate(dateStr) {
       const parts = dateStr.split('-');
-      return `${parts[2]}/${parts[1]}/${parts[0]}`; // Formato: dd/mm/yyyy
+      return `${parts[2]}/${parts[1]}/${parts[0]}
     }
   </script>
 </body>
