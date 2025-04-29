@@ -33,6 +33,26 @@
     <button class="btn btn-secondary mt-3" onclick="logout()">Sair</button>
   </div>
 
+  <!-- Modal de Confirmação -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Exclusão</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja excluir esta tarefa?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const USER = 'admin';
     const PASSWORD = 'admin';
@@ -41,6 +61,8 @@
     const dueDateInput = document.getElementById('due-date');
     const taskList = document.getElementById('task-list');
     const localStorageKey = 'taskList';
+
+    let taskToDelete = null; // variável global para guardar a tarefa a ser excluída
 
     document.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('loggedIn') === 'true') {
@@ -76,6 +98,7 @@
     }
 
     function loadTasks() {
+        taskList.innerHTML = "";
       const storedTasks = localStorage.getItem(localStorageKey);
       if (storedTasks) {
         const tasks = JSON.parse(storedTasks);
@@ -91,7 +114,7 @@
         const span = item.querySelector('.task-text');
         const dueDate = item.getAttribute('data-due-date');
         tasks.push({
-          text: span.textContent.split(' (Entrega:')[0],  // Salva só o texto puro
+          text: span.textContent.split(' (Entrega:')[0],
           finished: span.classList.contains('finished'),
           dueDate: dueDate
         });
@@ -137,12 +160,20 @@
     }
 
     function removeTask(button) {
-      if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-        const listItem = button.closest('.list-group-item');
-        listItem.remove();
-        saveTasks();
-      }
+      taskToDelete = button.closest('.list-group-item');
+      const confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+      confirmModal.show();
     }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+      if (taskToDelete) {
+        taskToDelete.remove();
+        saveTasks();
+        taskToDelete = null;
+      }
+      const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+      confirmModal.hide();
+    });
 
     function finishTask(button) {
       const listItem = button.closest('.list-group-item');
@@ -150,7 +181,6 @@
       const statusSpan = listItem.querySelector('.status-ok');
 
       textSpan.classList.toggle('finished');
-
       statusSpan.style.visibility = textSpan.classList.contains('finished') ? 'visible' : 'hidden';
 
       saveTasks();
@@ -158,7 +188,7 @@
 
     function formatDate(dateStr) {
       const parts = dateStr.split('-');
-      return `${parts[2]}/${parts[1]}/${parts[0]}`; // dd/mm/yyyy
+      return `${parts[2]}/${parts[1]}/${parts[0]}`; // Formato: dd/mm/yyyy
     }
   </script>
 </body>
